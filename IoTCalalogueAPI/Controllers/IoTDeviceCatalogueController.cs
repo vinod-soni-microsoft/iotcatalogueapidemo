@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 namespace IoTCalalogueAPI.Controllers
 {
@@ -21,9 +22,19 @@ namespace IoTCalalogueAPI.Controllers
         }
 
         [HttpGet(Name = "GetCatalogue")]
-        public IEnumerable<IoTDevice> GetCatalogue()
+        public IActionResult GetCatalogue()
         {
-            return catalogue;
+            if(!Request.Headers.TryGetValue("SecurityToken", out StringValues headerValue))
+            {
+                return Unauthorized("APIM Token Missing!");
+            }
+
+            if (headerValue.FirstOrDefault() != "123456")
+            {
+                return Unauthorized("APIM Token Missing!");
+            }
+
+            return Ok(catalogue);
         }
 
         [HttpGet("{deviceId}",  Name = "GetDevice")]
